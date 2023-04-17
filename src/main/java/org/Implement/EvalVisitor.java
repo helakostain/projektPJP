@@ -1,4 +1,8 @@
 package org.Implement;
 
-public class EvalVisitor {
+import org.antlr.v4.runtime.misc.Pair;
+import org.gen.MyGrammarBaseVisitor;
+
+public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
+
 }

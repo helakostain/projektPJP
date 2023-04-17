@@ -1,6 +1,5 @@
 package org.example;
 
-import org.Implement.EvalListener;
 import org.Implement.EvalVisitor;
 import org.Implement.VerboseListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -17,11 +16,14 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         FileInputStream inputFile = null;
+        String filename = "PLC_t1.in";
+        String path = "src/main/resources/"+filename;
         try {
-            inputFile = new FileInputStream("src/main/resources/PLC_t1.in");
+            inputFile = new FileInputStream(path);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        System.out.println("Parsing: " + filename);
         assert inputFile != null;
         ANTLRInputStream input = null;
         try {
@@ -32,22 +34,18 @@ public class Main {
         MyGrammarLexer lexer = new MyGrammarLexer((org.antlr.v4.runtime.CharStream) input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MyGrammarParser parser = new MyGrammarParser(tokens);
-        /*
+
         parser.addErrorListener(new VerboseListener());
 
-        ParseTree tree = parser.prog();
+        ParseTree tree = parser.program();
 
         if(parser.getNumberOfSyntaxErrors() == 0)
         {
-            //System.out.println(tree.toStringTree(parser));
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(new EvalListener(), tree);
-
             new EvalVisitor().visit(tree);
         }
         else
         {
             System.out.println("ERROR");
-        }*/
+        }
     }
 }
