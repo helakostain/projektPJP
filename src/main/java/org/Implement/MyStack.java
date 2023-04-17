@@ -36,7 +36,7 @@ public class MyStack {
         map.put(name, vari);
     }
 
-    public Pair<MyType, Object> getVal(Token val, Pair<MyType, Object> vari)
+    public Pair<MyType, Object> getVal(Token val)
     {
         var name = val.getText().trim();
         if(map.containsKey(name))
