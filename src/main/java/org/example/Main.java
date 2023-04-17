@@ -32,6 +32,7 @@ public class Main {
         MyGrammarLexer lexer = new MyGrammarLexer((org.antlr.v4.runtime.CharStream) input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MyGrammarParser parser = new MyGrammarParser(tokens);
+        //test
         /*
         parser.addErrorListener(new VerboseListener());
 
