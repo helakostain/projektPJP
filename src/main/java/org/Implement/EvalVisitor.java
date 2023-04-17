@@ -101,6 +101,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
         return super.visitEmptyStatement(ctx);
     }
 
+    //TODO: continue here
     @Override
     public Pair<MyType, Object> visitMulDivMod(MyGrammarParser.MulDivModContext ctx) {
         return super.visitMulDivMod(ctx);
@@ -165,7 +166,48 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
 
     @Override
     public Pair<MyType, Object> visitAddSubCon(MyGrammarParser.AddSubConContext ctx) {
-        return super.visitAddSubCon(ctx);
+        var left = visit(ctx.expr().get(0));
+        var right = visit(ctx.expr().get(1));
+        if(left.a.equals(MyType.Error) || right.a.equals(MyType.Error)) {
+            return new Pair<>(MyType.Error, 0);
+        }
+        switch (ctx.op.getType())
+        {
+            case MyGrammarParser.ADD -> {
+                if((left.a.equals(MyType.String) || right.a.equals(MyType.String)) || (left.a.equals(MyType.Boolean) || right.a.equals(MyType.Boolean))) {
+                    ErrorTracker.NewError(ctx.ADD().getSymbol(), "Expression " + left.b + " " + ctx.ADD().getText() + " " + right.b + " has wrong operands");
+                    ErrorTracker.PrintEraseErr();
+                    return new Pair<>(MyType.Error, 0);
+                }
+                if(left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) {
+                    return new Pair<>(MyType.Float, ((float)left.b + (float)right.b));
+                } else {
+                    return new Pair<>(MyType.Int, ((int)left.b + (int)right.b));
+                }
+            }
+            case MyGrammarParser.SUB -> {
+                if((left.a.equals(MyType.String) || right.a.equals(MyType.String)) || (left.a.equals(MyType.Boolean) || right.a.equals(MyType.Boolean))) {
+                    ErrorTracker.NewError(ctx.SUB().getSymbol(), "Expression " + left.b + " " + ctx.SUB().getText() + " " + right.b + " has wrong operands");
+                    ErrorTracker.PrintEraseErr();
+                    return new Pair<>(MyType.Error, 0);
+                }
+                if(left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) {
+                    return new Pair<>(MyType.Float, ((float)left.b - (float)right.b));
+                } else {
+                    return new Pair<>(MyType.Int, ((int)left.b - (int)right.b));
+                }
+            }
+            case MyGrammarParser.CON -> {
+                if(left.a.equals(MyType.String) && right.a.equals(MyType.String)) {
+                    return new Pair<>(MyType.String, (left.b.toString() + right.b.toString()));
+                } else {
+                    ErrorTracker.NewError(ctx.CON().getSymbol(), "Expression " + left.b + " " + ctx.CON().getText() + " " + right.b + " has wrong operands");
+                    ErrorTracker.PrintEraseErr();
+                    return new Pair<>(MyType.Error, 0);
+                }
+            }
+            default -> { return new Pair<>(MyType.Error,0); }
+        }
     }
 
     @Override
