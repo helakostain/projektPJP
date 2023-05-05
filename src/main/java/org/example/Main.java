@@ -1,6 +1,7 @@
 package org.example;
 
 import org.Implement.EvalVisitor;
+import org.Implement.MyType;
 import org.Implement.VerboseListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -41,7 +42,12 @@ public class Main {
 
         if(parser.getNumberOfSyntaxErrors() == 0)
         {
-            new EvalVisitor().visit(tree);
+            var check = new EvalVisitor().visit(tree);
+            if(check.a.equals(MyType.Error)){
+                System.out.println("ERROR: EvalVisitor failed -> " + check.toString());
+            } else {
+                ParseTreeWalker treeWalker = new ParseTreeWalker();
+            }
         }
         else
         {
