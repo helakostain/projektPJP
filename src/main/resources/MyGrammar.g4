@@ -4,7 +4,7 @@ grammar MyGrammar;
 program: statement+ EOF ;
 
 statement
-    : '{' statement* '}'                                    # blockOfStatements     // YY
+    : '{' statement (COMMA statement)* '}'                                    # blockOfStatements     // YY
     | primitiveType IDENTIFIER ( COMMA IDENTIFIER)* SEMI    # declaration           // YY
     | IF '(' expr ')' pos=statement (ELSE neg=statement)?   # ifElse                // YY
     | WHILE '(' expr ')' statement                          # while                 // Y

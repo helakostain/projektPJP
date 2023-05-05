@@ -16,7 +16,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         FileInputStream inputFile = null;
-        String filename = "PLC_t1.in";
+        String filename = "PLC_errors.in";
         String path = "src/main/resources/"+filename;
         try {
             inputFile = new FileInputStream(path);
