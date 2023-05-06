@@ -40,6 +40,9 @@ public class GeneratorListener extends MyGrammarBaseListener {
         String str = "";
         for (var stmnt: ctx.statement()) {
             var s = property.get(stmnt);
+            if(s == null) {
+                s = "";
+            }
             str += s;
             System.out.print(s);
         }
@@ -141,6 +144,9 @@ public class GeneratorListener extends MyGrammarBaseListener {
         for (var expr: ctx.expr()){
             var val = values.get(expr);
             var exprProp = property.get(expr);
+            if(exprProp == null){
+                exprProp = "";
+            }
             str += exprProp;
             count++;
         }
@@ -162,7 +168,9 @@ public class GeneratorListener extends MyGrammarBaseListener {
             case MyGrammarParser.MUL -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) * ToFloat(rightVal.b)));
-                    if(leftVal.a.equals(MyType.Float)){
+                    if(leftVal.a.equals(MyType.Float) && rightVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "mul\n");
+                    } else if(leftVal.a.equals(MyType.Float)){
                         property.put(ctx, leftProp + rightProp + "itof\n" + "mul\n");
                     } else {
                         property.put(ctx, leftProp + "itof\n" + rightProp + "mul\n");
@@ -175,7 +183,9 @@ public class GeneratorListener extends MyGrammarBaseListener {
             case MyGrammarParser.DIV -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) / ToFloat(rightVal.b)));
-                    if(leftVal.a.equals(MyType.Float)){
+                    if(leftVal.a.equals(MyType.Float) && rightVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "div\n");
+                    } else if(leftVal.a.equals(MyType.Float)){
                         property.put(ctx, leftProp + rightProp + "itof\n" + "div\n");
                     } else {
                         property.put(ctx, leftProp + "itof\n" + rightProp + "div\n");
@@ -251,7 +261,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
     @Override
     public void exitBool(MyGrammarParser.BoolContext ctx) {
         var val = ctx.getText();
-        property.put(ctx, "Push B " + val + "\n");
+        property.put(ctx, "push B " + val + "\n");
         if(val.equals("true")){
             values.put(ctx, new Pair<>(MyType.Boolean, true));
         } else {
@@ -262,8 +272,8 @@ public class GeneratorListener extends MyGrammarBaseListener {
     @Override
     public void exitString(MyGrammarParser.StringContext ctx) {
         var val = ctx.STRING().getText();
-        property.put(ctx, "Push S " + val + "\n");
-        values.put(ctx, new Pair<>(MyType.String, ctx.STRING().getText().replace('\\', '\0')));
+        property.put(ctx, "push S " + val + "\n");
+        values.put(ctx, new Pair<>(MyType.String, ctx.STRING().getText().replace('\\', ' ')));
     }
 
     @Override
@@ -310,14 +320,14 @@ public class GeneratorListener extends MyGrammarBaseListener {
     @Override
     public void exitFloat(MyGrammarParser.FloatContext ctx) {
         var val = Float.parseFloat(ctx.FLOAT().getText());
-        property.put(ctx, "Push F " + val + "\n");
+        property.put(ctx, "push F " + val + "\n");
         values.put(ctx, new Pair<>(MyType.Float, val));
     }
 
     @Override
     public void exitInt(MyGrammarParser.IntContext ctx) {
         var val = Integer.parseInt(ctx.INT().getText(), 10);
-        property.put(ctx, "Push I " + val + "\n");
+        property.put(ctx, "push I " + val + "\n");
         values.put(ctx, new Pair<>(MyType.Int, val));
     }
 
@@ -433,16 +443,16 @@ public class GeneratorListener extends MyGrammarBaseListener {
     public void exitPrimitiveType(MyGrammarParser.PrimitiveTypeContext ctx) {
         if(ctx.type.getText().equals("int")){
             values.put(ctx, new Pair<>(MyType.Int, 0));
-            property.put(ctx, "Push I 0\n");
+            property.put(ctx, "push I 0\n");
         } else if(ctx.type.getText().equals("float")){
             values.put(ctx, new Pair<>(MyType.Float, 0.0));
-            property.put(ctx, "Push F 0.0\n");
+            property.put(ctx, "push F 0.0\n");
         } else if(ctx.type.getText().equals("string")){
             values.put(ctx, new Pair<>(MyType.String, ""));
-            property.put(ctx, "Push S \"\"\n");
+            property.put(ctx, "push S \"\"\n");
         } else {
             values.put(ctx, new Pair<>(MyType.Boolean, true));
-            property.put(ctx, "Push B true\n");
+            property.put(ctx, "push B true\n");
         }
     }
 }
