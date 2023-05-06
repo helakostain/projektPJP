@@ -258,7 +258,9 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
     @Override
     public Pair<MyType, Object> visitNegation(MyGrammarParser.NegationContext ctx) {
         var op = visit(ctx.expr());
-        if(op.a.equals(MyType.Error)){ return new Pair<>(MyType.Error, 0); }
+        if(op.a.equals(MyType.Error)){
+            return new Pair<>(MyType.Error, 0);
+        }
         switch (op.a){
             case Boolean -> { return new Pair<>(MyType.Boolean, !((boolean)op.b));}
             default -> {
@@ -335,6 +337,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
         if(val.a.equals(MyType.Error) || right.a.equals(MyType.Error)) { return new Pair<>(MyType.Error,0);}
         if(val.a.equals(right.a)) {
             stack.setVal(ctx.IDENTIFIER().getSymbol(), right);
+            return right;
         }
         if(val.a.equals(MyType.Float) && right.a.equals(MyType.Int)) {
             var val2 = new Pair<>(MyType.Float, right.b);
