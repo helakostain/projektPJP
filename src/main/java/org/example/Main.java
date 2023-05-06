@@ -1,6 +1,7 @@
 package org.example;
 
 import org.Implement.EvalVisitor;
+import org.Implement.GeneratorListener;
 import org.Implement.MyType;
 import org.Implement.VerboseListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         FileInputStream inputFile = null;
-        String filename = "PLC_errors.in";
+        String filename = "PLC_t1.in";
         String path = "src/main/resources/"+filename;
         try {
             inputFile = new FileInputStream(path);
@@ -47,6 +48,7 @@ public class Main {
                 System.out.println("ERROR: EvalVisitor failed -> " + check.toString());
             } else {
                 ParseTreeWalker treeWalker = new ParseTreeWalker();
+                treeWalker.walk(new GeneratorListener(), tree);
             }
         }
         else

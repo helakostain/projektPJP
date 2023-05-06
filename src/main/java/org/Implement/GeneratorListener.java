@@ -18,6 +18,8 @@ public class GeneratorListener extends MyGrammarBaseListener {
     ParseTreeProperty<Pair<MyType, Object>> values = new ParseTreeProperty<>();
     MyStack stack = new MyStack();
     int num = 0;
+    boolean isFirst = true;
+    String strFirst = "";
     private int genNum()
     {
         return num++;
@@ -191,172 +193,256 @@ public class GeneratorListener extends MyGrammarBaseListener {
     }
 
     @Override
-    public void enterParens(MyGrammarParser.ParensContext ctx) {
-        super.enterParens(ctx); //TODO: CONTINUE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    }
-
-    @Override
     public void exitParens(MyGrammarParser.ParensContext ctx) {
-        super.exitParens(ctx);
-    }
-
-    @Override
-    public void enterNegation(MyGrammarParser.NegationContext ctx) {
-        super.enterNegation(ctx);
+        property.put(ctx, property.get(ctx.expr()));
+        values.put(ctx, values.get(ctx.expr()));
     }
 
     @Override
     public void exitNegation(MyGrammarParser.NegationContext ctx) {
-        super.exitNegation(ctx);
-    }
-
-    @Override
-    public void enterComparison(MyGrammarParser.ComparisonContext ctx) {
-        super.enterComparison(ctx);
+        var op = property.get(ctx.expr());
+        var val = values.get(ctx.expr());
+        values.put(ctx, new Pair<>(MyType.Boolean, !(boolean)val.b));
+        property.put(ctx, op + "not\n");
     }
 
     @Override
     public void exitComparison(MyGrammarParser.ComparisonContext ctx) {
-        super.exitComparison(ctx);
-    }
-
-    @Override
-    public void enterBool(MyGrammarParser.BoolContext ctx) {
-        super.enterBool(ctx);
+        var leftProp = property.get(ctx.expr().get(0));
+        var rightProp = property.get(ctx.expr().get(1));
+        var leftVal = values.get(ctx.expr().get(0));
+        var rightVal = values.get(ctx.expr().get(1));
+        switch (ctx.op.getType()){
+            case MyGrammarParser.EQ -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) == ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "eq\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "eq\n");
+                    }
+                }else if (leftVal.a.equals(MyType.String)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, leftVal.b.toString() == rightVal.b.toString()));
+                    property.put(ctx, leftProp + rightProp + "eq\n");
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b == (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "eq\n");
+                }
+            } //TODO: should break; here?
+            case MyGrammarParser.NEQ -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) != ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "eq\n" + "not\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "eq\n" + "not\n");
+                    }
+                } else if(leftVal.a.equals(MyType.String)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, leftVal.b.toString() != rightVal.b.toString()));
+                    property.put(ctx, leftProp + rightProp + "eq\n" + "not\n");
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b != (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "eq\n" + "not\n");
+                }
+            }
+        }
     }
 
     @Override
     public void exitBool(MyGrammarParser.BoolContext ctx) {
-        super.exitBool(ctx);
-    }
-
-    @Override
-    public void enterString(MyGrammarParser.StringContext ctx) {
-        super.enterString(ctx);
+        var val = ctx.getText();
+        property.put(ctx, "Push B " + val + "\n");
+        if(val.equals("true")){
+            values.put(ctx, new Pair<>(MyType.Boolean, true));
+        } else {
+            values.put(ctx, new Pair<>(MyType.Boolean, false));
+        }
     }
 
     @Override
     public void exitString(MyGrammarParser.StringContext ctx) {
-        super.exitString(ctx);
+        var val = ctx.STRING().getText();
+        property.put(ctx, "Push S " + val + "\n");
+        values.put(ctx, new Pair<>(MyType.String, ctx.STRING().getText().replace('\\', '\0')));
     }
 
     @Override
     public void enterAssignment(MyGrammarParser.AssignmentContext ctx) {
-        super.enterAssignment(ctx);
+        if(isFirst){
+            isFirst=false;
+            strFirst=ctx.expr().getText();
+        }
     }
 
     @Override
     public void exitAssignment(MyGrammarParser.AssignmentContext ctx) {
-        super.exitAssignment(ctx);
-    }
-
-    @Override
-    public void enterLogicalAnd(MyGrammarParser.LogicalAndContext ctx) {
-        super.enterLogicalAnd(ctx);
+        var right = property.get(ctx.expr());
+        var rightVal = values.get(ctx.expr());
+        var val = stack.getVal(ctx.IDENTIFIER().getSymbol());
+        String res = ctx.IDENTIFIER().getText();
+        if(val.a.equals(rightVal.a)){
+            stack.setVal(ctx.IDENTIFIER().getSymbol(), rightVal);
+            values.put(ctx, rightVal);
+            property.put(ctx, right + "save " + res + "\n" + "load " + res + "\n");
+        } else {
+            var tmp = new Pair<>(MyType.Float, rightVal.b); //TODO: ma byt ta value ToFloat ale rve to chybu
+            stack.setVal(ctx.IDENTIFIER().getSymbol(), tmp);
+            values.put(ctx, tmp);
+            property.put(ctx, right + "itof\n" + "save " + res + "\n" + "load " + res + "\n");
+        }
+        if (ctx.expr().getText().equals(strFirst) && !isFirst) {
+            isFirst = true;
+            right = property.get(ctx);
+            property.put(ctx, right + "pop\n");
+        }
     }
 
     @Override
     public void exitLogicalAnd(MyGrammarParser.LogicalAndContext ctx) {
-        super.exitLogicalAnd(ctx);
-    }
-
-    @Override
-    public void enterFloat(MyGrammarParser.FloatContext ctx) {
-        super.enterFloat(ctx);
+        var leftProp = property.get(ctx.expr().get(0));
+        var rightProp = property.get(ctx.expr().get(1));
+        var leftVal = values.get(ctx.expr().get(0));
+        var rightVal = values.get(ctx.expr().get(1));
+        values.put(ctx, new Pair<>(MyType.Boolean, (boolean)leftVal.b && (boolean)rightVal.b));
+        property.put(ctx, leftProp + rightProp + "and\n");
     }
 
     @Override
     public void exitFloat(MyGrammarParser.FloatContext ctx) {
-        super.exitFloat(ctx);
-    }
-
-    @Override
-    public void enterInt(MyGrammarParser.IntContext ctx) {
-        super.enterInt(ctx);
+        var val = Float.parseFloat(ctx.FLOAT().getText());
+        property.put(ctx, "Push F " + val + "\n");
+        values.put(ctx, new Pair<>(MyType.Float, val));
     }
 
     @Override
     public void exitInt(MyGrammarParser.IntContext ctx) {
-        super.exitInt(ctx);
-    }
-
-    @Override
-    public void enterRelation(MyGrammarParser.RelationContext ctx) {
-        super.enterRelation(ctx);
+        var val = Integer.parseInt(ctx.INT().getText(), 10);
+        property.put(ctx, "Push I " + val + "\n");
+        values.put(ctx, new Pair<>(MyType.Int, val));
     }
 
     @Override
     public void exitRelation(MyGrammarParser.RelationContext ctx) {
-        super.exitRelation(ctx);
-    }
-
-    @Override
-    public void enterAddSubCon(MyGrammarParser.AddSubConContext ctx) {
-        super.enterAddSubCon(ctx);
+        var leftProp = property.get(ctx.expr().get(0));
+        var rightProp = property.get(ctx.expr().get(1));
+        var leftVal = values.get(ctx.expr().get(0));
+        var rightVal = values.get(ctx.expr().get(1));
+        switch (ctx.op.getType()){
+            case MyGrammarParser.LES -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) < ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "lt\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "lt\n");
+                    }
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b < (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "lt\n");
+                }
+            } //TODO: should break; here?
+            case MyGrammarParser.GRE -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) > ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "gt\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "gt\n");
+                    }
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b > (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "gt\n");
+                }
+            }
+        }
     }
 
     @Override
     public void exitAddSubCon(MyGrammarParser.AddSubConContext ctx) {
-        super.exitAddSubCon(ctx);
-    }
-
-    @Override
-    public void enterUnaryMinus(MyGrammarParser.UnaryMinusContext ctx) {
-        super.enterUnaryMinus(ctx);
+        var leftProp = property.get(ctx.expr().get(0));
+        var rightProp = property.get(ctx.expr().get(1));
+        var leftVal = values.get(ctx.expr().get(0));
+        var rightVal = values.get(ctx.expr().get(1));
+        switch (ctx.op.getType()){
+            case MyGrammarParser.ADD -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) + ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "add\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "add\n");
+                    }
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Int, (int)leftVal.b + (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "add\n");
+                }
+            } //TODO: should break; here?
+            case MyGrammarParser.SUB -> {
+                if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
+                    values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) - ToFloat(rightVal.b)));
+                    if(leftVal.a.equals(MyType.Float)){
+                        property.put(ctx, leftProp + rightProp + "itof\n" + "sub\n");
+                    } else {
+                        property.put(ctx, leftProp + "itof\n" + rightProp + "sub\n");
+                    }
+                } else {
+                    values.put(ctx, new Pair<>(MyType.Int, (int)leftVal.b - (int)rightVal.b));
+                    property.put(ctx, leftProp + rightProp + "sub\n");
+                }
+            }
+            case MyGrammarParser.CON -> {
+                values.put(ctx, new Pair<>(MyType.String, leftVal.b.toString() + rightVal.b.toString()));
+                property.put(ctx, leftProp + rightProp + "concat\n");
+            }
+        }
     }
 
     @Override
     public void exitUnaryMinus(MyGrammarParser.UnaryMinusContext ctx) {
-        super.exitUnaryMinus(ctx);
-    }
-
-    @Override
-    public void enterId(MyGrammarParser.IdContext ctx) {
-        super.enterId(ctx);
+        var val = values.get(ctx.expr());
+        var prop = property.get(ctx.expr());
+        switch (val.a){
+            case Int -> {
+                values.put(ctx, new Pair<>(MyType.Int, -(int)val.b));
+                property.put(ctx, prop + "uminus\n");
+            }
+            case Float -> {
+                values.put(ctx, new Pair<>(MyType.Float, -ToFloat(val.b)));
+                property.put(ctx, prop + "uminus\n");
+            }
+        }
     }
 
     @Override
     public void exitId(MyGrammarParser.IdContext ctx) {
-        super.exitId(ctx);
-    }
-
-    @Override
-    public void enterLogicalOr(MyGrammarParser.LogicalOrContext ctx) {
-        super.enterLogicalOr(ctx);
+        values.put(ctx, stack.getVal(ctx.IDENTIFIER().getSymbol()));
+        property.put(ctx, "load " + ctx.IDENTIFIER().getText() + "\n");
     }
 
     @Override
     public void exitLogicalOr(MyGrammarParser.LogicalOrContext ctx) {
-        super.exitLogicalOr(ctx);
-    }
-
-    @Override
-    public void enterPrimitiveType(MyGrammarParser.PrimitiveTypeContext ctx) {
-        super.enterPrimitiveType(ctx);
+        var leftProp = property.get(ctx.expr().get(0));
+        var rightProp = property.get(ctx.expr().get(1));
+        var leftVal = values.get(ctx.expr().get(0));
+        var rightVal = values.get(ctx.expr().get(1));
+        values.put(ctx, new Pair<>(MyType.Boolean, (boolean)leftVal.b || (boolean)rightVal.b));
+        property.put(ctx, leftProp + rightProp + "or\n");
     }
 
     @Override
     public void exitPrimitiveType(MyGrammarParser.PrimitiveTypeContext ctx) {
-        super.exitPrimitiveType(ctx);
-    }
-
-    @Override
-    public void enterEveryRule(ParserRuleContext ctx) {
-        super.enterEveryRule(ctx);
-    }
-
-    @Override
-    public void exitEveryRule(ParserRuleContext ctx) {
-        super.exitEveryRule(ctx);
-    }
-
-    @Override
-    public void visitTerminal(TerminalNode node) {
-        super.visitTerminal(node);
-    }
-
-    @Override
-    public void visitErrorNode(ErrorNode node) {
-        super.visitErrorNode(node);
+        if(ctx.type.getText().equals("int")){
+            values.put(ctx, new Pair<>(MyType.Int, 0));
+            property.put(ctx, "Push I 0\n");
+        } else if(ctx.type.getText().equals("float")){
+            values.put(ctx, new Pair<>(MyType.Float, 0.0));
+            property.put(ctx, "Push F 0.0\n");
+        } else if(ctx.type.getText().equals("string")){
+            values.put(ctx, new Pair<>(MyType.String, ""));
+            property.put(ctx, "Push S \"\"\n");
+        } else {
+            values.put(ctx, new Pair<>(MyType.Boolean, true));
+            property.put(ctx, "Push B true\n");
+        }
     }
 }
