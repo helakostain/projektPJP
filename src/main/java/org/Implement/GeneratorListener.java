@@ -110,7 +110,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
         String str = "";
         boolean flag = false;
         for (var id: ctx.IDENTIFIER()) {
-            if(flag){break;} //TODO: is this needed????
+            //if(flag){break;} //TODO: is this needed????
             var variable = stack.getVal(id.getSymbol());
             switch (variable.a){
                 case Boolean -> {
