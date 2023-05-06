@@ -87,11 +87,11 @@ public class GeneratorListener extends MyGrammarBaseListener {
         var cond = property.get(ctx.expr());
         String pos = "";
         String neg = "";
-        int jump = genNum();
+        int jmp = genNum();
         int posEnd = genNum();
-        neg += (ctx.neg.equals(null)) ? "" : property.get(ctx.neg);
+        neg += (ctx.neg == null) ? "" : property.get(ctx.neg);
         pos += property.get(ctx.pos);
-        property.put(ctx, cond + "fjump " + jump + "\n" + pos + "jump " + posEnd + "\n" + "label " + jump + "\n" + neg + "label " + posEnd + "\n");
+        property.put(ctx, cond + "fjmp " + jmp + "\n" + pos + "jmp " + posEnd + "\n" + "label " + jmp + "\n" + neg + "label " + posEnd + "\n");
     }
 
     @Override
@@ -101,8 +101,8 @@ public class GeneratorListener extends MyGrammarBaseListener {
         int start = genNum();
         int end = genNum();
         body += property.get(ctx.statement());
-        body += "jump " + start + "\n";
-        property.put(ctx, "label " + start + "\n" + cond + "fjump " + end + "\n" + body + "label " + end + "\n");
+        body += "jmp " + start + "\n";
+        property.put(ctx, "label " + start + "\n" + cond + "fjmp " + end + "\n" + body + "label " + end + "\n");
     }
 
     @Override
