@@ -14,7 +14,7 @@ public class MyStack {
         var name = variable.getText().trim();
         if(map.containsKey(name))
         {
-            ErrorTracker.NewError(variable, variable + "is already in stack!");
+            ErrorTracker.NewError(variable, variable.getText() + " is already in stack!");
         }
         else
         {
@@ -45,7 +45,7 @@ public class MyStack {
         }
         else
         {
-            ErrorTracker.NewError(val, val + " was NOT added to stack!");
+            ErrorTracker.NewError(val, val.getText() + " was NOT added to stack!");
             return new Pair<>(MyType.Error, 0);
         }
     }

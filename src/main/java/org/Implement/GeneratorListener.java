@@ -46,7 +46,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
             str += s;
             System.out.print(s);
         }
-        File file = new File("PLC_t2.out.txt");
+        File file = new File("PLC_errors.out.txt");
         try {
             if (!file.exists()) {
                     file.createNewFile();
@@ -110,7 +110,6 @@ public class GeneratorListener extends MyGrammarBaseListener {
         String str = "";
         boolean flag = false;
         for (var id: ctx.IDENTIFIER()) {
-            //if(flag){break;} //TODO: is this needed????
             var variable = stack.getVal(id.getSymbol());
             switch (variable.a){
                 case Boolean -> {
@@ -179,7 +178,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
                     values.put(ctx, new Pair<>(MyType.Int, (int)leftVal.b * (int)rightVal.b));
                     property.put(ctx, leftProp + rightProp + "mul\n");
                 }
-            } //TODO: should break; here?
+            }
             case MyGrammarParser.DIV -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) / ToFloat(rightVal.b)));
@@ -238,7 +237,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
                     values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b == (int)rightVal.b));
                     property.put(ctx, leftProp + rightProp + "eq\n");
                 }
-            } //TODO: should break; here?
+            }
             case MyGrammarParser.NEQ -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) != ToFloat(rightVal.b)));
@@ -295,7 +294,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
             values.put(ctx, rightVal);
             property.put(ctx, right + "save " + res + "\n" + "load " + res + "\n");
         } else {
-            var tmp = new Pair<>(MyType.Float, rightVal.b); //TODO: ma byt ta value ToFloat ale rve to chybu
+            var tmp = new Pair<>(MyType.Float, rightVal.b);
             stack.setVal(ctx.IDENTIFIER().getSymbol(), tmp);
             values.put(ctx, tmp);
             property.put(ctx, right + "itof\n" + "save " + res + "\n" + "load " + res + "\n");
@@ -350,7 +349,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
                     values.put(ctx, new Pair<>(MyType.Boolean, (int)leftVal.b < (int)rightVal.b));
                     property.put(ctx, leftProp + rightProp + "lt\n");
                 }
-            } //TODO: should break; here?
+            }
             case MyGrammarParser.GRE -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Boolean, ToFloat(leftVal.b) > ToFloat(rightVal.b)));
@@ -386,7 +385,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
                     values.put(ctx, new Pair<>(MyType.Int, (int)leftVal.b + (int)rightVal.b));
                     property.put(ctx, leftProp + rightProp + "add\n");
                 }
-            } //TODO: should break; here?
+            }
             case MyGrammarParser.SUB -> {
                 if(leftVal.a.equals(MyType.Float) || rightVal.a.equals(MyType.Float)){
                     values.put(ctx, new Pair<>(MyType.Float, ToFloat(leftVal.b) - ToFloat(rightVal.b)));

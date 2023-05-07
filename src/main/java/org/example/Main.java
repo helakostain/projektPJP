@@ -15,7 +15,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         FileInputStream inputFile = null;
-        String filename = "PLC_t2.in";
+        String filename = "PLC_errors.in";
         String path = "src/main/resources/"+filename;
         try {
             inputFile = new FileInputStream(path);
@@ -47,7 +47,7 @@ public class Main {
                 ParseTreeWalker treeWalker = new ParseTreeWalker();
                 treeWalker.walk(new GeneratorListener(), tree);
 
-                VirtualMachine vm = new VirtualMachine("PLC_t2.out.txt");
+                VirtualMachine vm = new VirtualMachine("PLC_errors.out.txt");
                 vm.run();
             }
         }

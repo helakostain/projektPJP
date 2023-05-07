@@ -309,7 +309,6 @@ public class VirtualMachine {
                 cmd = code.get(current).split(" ",3);
             }
             //System.out.println(Arrays.toString(cmd));
-            //TODO: to musi jit predelat do switche ne?
             switch (cmd[0]) {
                 case "jmp" -> {
                     int to = Integer.parseInt(cmd[1]);

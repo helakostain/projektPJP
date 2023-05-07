@@ -162,10 +162,10 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
         for (var expr : ctx.expr()) {
             var val = visit(expr);
             if(!val.a.equals(MyType.Error)){
-                System.out.print(val.b);
+                //System.out.print(val.b);
             }
         }
-        System.out.print("\n");
+        //System.out.print("\n");
         return new Pair<>(MyType.Empty,0);
     }
 
@@ -173,7 +173,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
     public Pair<MyType, Object> visitPrintExpr(MyGrammarParser.PrintExprContext ctx) {
         var val = visit(ctx.expr());
         if(!val.a.equals(MyType.Error)) {
-            System.out.print(val.b);
+            //System.out.print(val.b);
             return new Pair<>(MyType.Empty, 0);
         }
         else {
@@ -236,7 +236,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
                 }
             }
             case MyGrammarParser.MOD -> {
-                if(left.a.equals(MyType.Int) || right.a.equals(MyType.Int)) {
+                if(left.a.equals(MyType.Int) && right.a.equals(MyType.Int)) {
                     return new Pair<>(MyType.Int, ((int)left.b % (int)right.b));
                 } else {
                     ErrorTracker.NewError(ctx.MOD().getSymbol(), "Expression " + left.b + " " + ctx.MOD().getText() + " " + right.b + " has wrong operands!");
@@ -299,7 +299,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
                     ErrorTracker.PrintEraseErr();
                     return new Pair<>(MyType.Error, 0);
                 }
-                if (left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) { //TODO: mozna blbost?
+                if (left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) {
                     return new Pair<>(MyType.Boolean, ToFloat(left.b) != ToFloat(right.b));
                 } else if (left.a.equals(MyType.Int) && right.a.equals(MyType.Int)) {
                     return new Pair<>(MyType.Boolean, (int)left.b != (int)right.b);

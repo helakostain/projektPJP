@@ -102,8 +102,8 @@ public class GeneratorVisitor extends MyGrammarBaseVisitor<String> {
     }
 
     @Override
-    public String visitFloat(MyGrammarParser.FloatContext ctx) { //TODO: tahle metoda se mi nezda, float to double?????
-        var val = Double.parseDouble(ctx.FLOAT().getText());
+    public String visitFloat(MyGrammarParser.FloatContext ctx) {
+        var val = Float.parseFloat(ctx.FLOAT().getText());
         return "Push F " + val + "\n";
     }
 
