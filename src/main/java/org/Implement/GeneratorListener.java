@@ -46,7 +46,7 @@ public class GeneratorListener extends MyGrammarBaseListener {
             str += s;
             System.out.print(s);
         }
-        File file = new File("PLC_t1.out.txt");
+        File file = new File("PLC_t2.out.txt");
         try {
             if (!file.exists()) {
                     file.createNewFile();

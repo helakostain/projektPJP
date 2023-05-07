@@ -285,7 +285,7 @@ public class EvalVisitor extends MyGrammarBaseVisitor<Pair<MyType, Object>> {
                     ErrorTracker.PrintEraseErr();
                     return new Pair<>(MyType.Error, 0);
                 }
-                if (left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) { //TODO: mozna blbost?
+                if (left.a.equals(MyType.Float) || right.a.equals(MyType.Float)) {
                     return new Pair<>(MyType.Boolean, ToFloat(left.b) == ToFloat(right.b));
                 } else if (left.a.equals(MyType.Int) && right.a.equals(MyType.Int)) {
                     return new Pair<>(MyType.Boolean, (int)left.b == (int)right.b);

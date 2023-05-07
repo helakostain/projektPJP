@@ -1,9 +1,6 @@
 package org.example;
 
-import org.Implement.EvalVisitor;
-import org.Implement.GeneratorListener;
-import org.Implement.MyType;
-import org.Implement.VerboseListener;
+import org.Implement.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -18,7 +15,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         FileInputStream inputFile = null;
-        String filename = "PLC_t1.in";
+        String filename = "PLC_t2.in";
         String path = "src/main/resources/"+filename;
         try {
             inputFile = new FileInputStream(path);
@@ -49,6 +46,9 @@ public class Main {
             } else {
                 ParseTreeWalker treeWalker = new ParseTreeWalker();
                 treeWalker.walk(new GeneratorListener(), tree);
+
+                VirtualMachine vm = new VirtualMachine("PLC_t2.out.txt");
+                vm.run();
             }
         }
         else
